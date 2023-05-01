@@ -43,6 +43,7 @@ type ShopeeClient struct {
 	AccessToken string
 	Auth        AuthService
 	Util        UtilService
+	Chat        ChatService
 }
 
 // A general response error
@@ -69,6 +70,7 @@ func NewClient(app AppConfig, opts ...Option) *ShopeeClient {
 
 	c.Auth = &AuthServiceOp{client: c}
 	c.Util = &UtilServiceOp{client: c}
+	c.Chat = &ChatServiceOp{client: c}
 
 	// apply any options
 	for _, opt := range opts {
@@ -175,6 +177,23 @@ func (c *ShopeeClient) NewRequest(method, relPath string, body, options, headers
 	c.makeSignature(req)
 
 	return req, nil
+}
+
+func (c *ShopeeClient) WithShop(sid uint64, tok string) *ShopeeClient {
+	c.ShopID = sid
+	c.AccessToken = tok
+	return c
+}
+
+func (c *ShopeeClient) WithMerchant(mid uint64, tok string) *ShopeeClient {
+	c.MerchantID = mid
+	c.AccessToken = tok
+	return c
+}
+
+func (c *ShopeeClient) WithToken(tok string) *ShopeeClient {
+	c.AccessToken = tok
+	return c
 }
 
 // https://open.shopee.com/documents?module=87&type=2&id=58&version=2
