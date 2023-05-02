@@ -2,6 +2,7 @@ package shopee
 
 type ChatService interface {
 	GetMessage(shopID uint64, token string, params GetMessageParamsRequest) (*GetMessageResponse, error)
+	GetConversationList(shopID uint64, token string, params GetConversationParamsRequest) (*GetConversationResponse, error)
 }
 
 type GetMessageParamsRequest struct {
@@ -59,6 +60,54 @@ type ContentMessage struct {
 	} `json:"source_content"`
 }
 
+type GetConversationParamsRequest struct {
+	Direction    string `url:"direction"`
+	Type         string `url:"type"`
+	NextTimeNano int64  `url:"next_timestamp_nano"`
+	PageSize     int    `url:"page_size"`
+}
+
+type GetConversationResponse struct {
+	BaseResponse
+
+	Response GetConversationDataResponse `json:"response"`
+}
+
+type GetConversationDataResponse struct {
+	PageResult        ConversationPageResult `json:"page_result"`
+	ConversationsList []Conversation         `json:"conversations"`
+}
+
+type Conversation struct {
+	ConversationID       string `json:"conversation_id"`
+	ToID                 int    `json:"to_id"`
+	ToName               string `json:"to_name"`
+	ToAvatar             string `json:"to_avatar"`
+	ShopID               int    `json:"shop_id"`
+	UnreadCount          int    `json:"unread_count"`
+	Pinned               bool   `json:"pinned"`
+	Mute                 bool   `json:"mute"`
+	LastReadMessageID    string `json:"last_read_message_id"`
+	LatestMessageID      string `json:"latest_message_id"`
+	LatestMessageType    string `json:"latest_message_type"`
+	LatestMessageContent struct {
+		Text string `json:"text"`
+	} `json:"latest_message_content"`
+	LatestMessageFromID      int    `json:"latest_message_from_id"`
+	LastMessageTimestamp     int64  `json:"last_message_timestamp"`
+	LastMessageOption        int    `json:"last_message_option"`
+	MaxGeneralOptionHideTime string `json:"max_general_option_hide_time"`
+}
+
+type ConversationPageResult struct {
+	PageSize   int `json:"page_size"`
+	NextCursor struct {
+		NextMessageTimeNano string `json:"next_message_time_nano"`
+		ConversationID      string `json:"conversation_id"`
+	} `json:"next_cursor"`
+	More bool `json:"more"`
+}
+
 type ChatServiceOp struct {
 	client *ShopeeClient
 }
@@ -71,6 +120,21 @@ func (s *ChatServiceOp) GetMessage(shopID uint64, token string, params GetMessag
 	}
 
 	resp := new(GetMessageResponse)
+	err := s.client.WithShop(uint64(shopID), token).Get(path, resp, opt)
+	return resp, err
+}
+
+func (s *ChatServiceOp) GetConversationList(shopID uint64, token string, params GetConversationParamsRequest) (*GetConversationResponse, error) {
+	path := "/sellerchat/get_conversation_list"
+
+	opt := GetConversationParamsRequest{
+		PageSize:     params.PageSize,
+		Direction:    params.Direction,
+		Type:         params.Type,
+		NextTimeNano: params.NextTimeNano,
+	}
+
+	resp := new(GetConversationResponse)
 	err := s.client.WithShop(uint64(shopID), token).Get(path, resp, opt)
 	return resp, err
 }

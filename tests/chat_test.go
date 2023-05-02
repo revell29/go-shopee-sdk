@@ -30,3 +30,28 @@ func Test_GetMessages(t *testing.T) {
 		t.Errorf("MessageList.MessageID returned %+v, expected %+v", res.Response.MessagesList[0].MessageID, expectedMsgID)
 	}
 }
+
+func Test_GetConversationList(t *testing.T) {
+	setup()
+	defer teardown()
+
+	httpmock.RegisterResponder("GET", fmt.Sprintf("%s/api/v2/sellerchat/get_conversation_list", app.APIURL),
+		httpmock.NewBytesResponder(200, loadFixture("get_conversation_resp.json")))
+
+	res, err := client.Chat.GetConversationList(123456, accessToken, shopee.GetConversationParamsRequest{
+		PageSize:  50,
+		Direction: "latest",
+		Type:      "all",
+	})
+
+	if err != nil {
+		t.Errorf("Chat.GetMessages error: %s", err)
+	}
+
+	t.Logf("return tok: %#v", res)
+
+	var expectedConversationID string = "38732689394223980"
+	if res.Response.ConversationsList[0].ConversationID != expectedConversationID {
+		t.Errorf("ConversationList.MessageID returned %+v, expected %+v", res.Response.ConversationsList[0].ConversationID, expectedConversationID)
+	}
+}
