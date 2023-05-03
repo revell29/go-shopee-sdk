@@ -165,8 +165,12 @@ type SendMessageRequest struct {
 }
 
 type ContentSendMessage struct {
-	ContentMessage
-	ImageURL string `json:"image_url,omitempty"`
+	Text             string `json:"text,omitempty"`
+	StickerID        string `json:"sticker_id,omitempty"`
+	StickerPackageID string `json:"sticker_package_id,omitempty"`
+	ImageURL         string `json:"image_url,omitempty"`
+	ItemID           int64  `json:"item_id,omitempty"`
+	OrderSN          string `json:"order_sn,omitempty"`
 }
 
 func (s *ChatServiceOp) SendMessage(shopID uint64, token string, request SendMessageRequest) (*GetSendMessageResponse, error) {
