@@ -56,8 +56,8 @@ type ContentMessage struct {
 	ItemID           int64  `json:"item_id,omitempty"`
 	OrderID          int64  `json:"order_id,omitempty"`
 	SourceContent    struct {
-		OrderSN string `json:"order_sn"`
-		ItemID  int64  `json:"item_id"`
+		OrderSN string `json:"order_sn,omitempty"`
+		ItemID  int64  `json:"item_id,omitempty"`
 	} `json:"source_content,omitempty"`
 }
 
