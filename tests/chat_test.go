@@ -55,3 +55,26 @@ func Test_GetConversationList(t *testing.T) {
 		t.Errorf("ConversationList.MessageID returned %+v, expected %+v", res.Response.ConversationsList[0].ConversationID, expectedConversationID)
 	}
 }
+
+func Test_SendMessage(t *testing.T) {
+	setup()
+	defer teardown()
+
+	httpmock.RegisterResponder("POST", fmt.Sprintf("%s/api/v2/sellerchat/send_message", app.APIURL),
+		httpmock.NewBytesResponder(200, loadFixture("send_message_resp.json")))
+
+	var req shopee.SendMessageRequest
+	loadMockData("send_message_req.json", &req)
+
+	res, err := client.Chat.SendMessage(shopID, accessToken, req)
+
+	if err != nil {
+		t.Errorf("Product.AddItem error: %s", err)
+	}
+
+	t.Logf("Chat.SendMessage: %#v", res)
+	var expectedID int = 9018093
+	if res.Response.ToID != expectedID {
+		t.Errorf("ToID returned %+v, expected %+v", res.Response.ToID, expectedID)
+	}
+}
