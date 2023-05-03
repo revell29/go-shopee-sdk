@@ -40,25 +40,25 @@ type Messages struct {
 }
 
 type ContentMessage struct {
-	Text             string `json:"text"`
-	Url              string `json:"url"`
-	ThumbHeight      int    `json:"thumb_height"`
-	ThumbWidth       int    `json:"thumb_width"`
-	FileServerID     int64  `json:"file_server_id"`
-	ShopID           int64  `json:"shop_id"`
-	OfferID          int    `json:"offer_id"`
-	ProductID        int    `json:"product_id"`
-	TaxValue         string `json:"tax_value"`
-	PriceBeforeTax   string `json:"price_before_tax"`
-	TaxApplicable    bool   `json:"tax_applicable"`
-	StickerID        string `json:"stiker_id"`
-	StickerPackageID string `json:"sticker_package_id"`
-	ItemID           int64  `json:"item_id"`
-	OrderID          int64  `json:"order_id"`
+	Text             string `json:"text,omitempty"`
+	Url              string `json:"url,omitempty"`
+	ThumbHeight      int    `json:"thumb_height,omitempty"`
+	ThumbWidth       int    `json:"thumb_width,omitempty"`
+	FileServerID     int64  `json:"file_server_id,omitempty"`
+	ShopID           int64  `json:"shop_id,omitempty"`
+	OfferID          int    `json:"offer_id,omitempty"`
+	ProductID        int    `json:"product_id,omitempty"`
+	TaxValue         string `json:"tax_value,omitempty"`
+	PriceBeforeTax   string `json:"price_before_tax,omitempty"`
+	TaxApplicable    bool   `json:"tax_applicable,omitempty"`
+	StickerID        string `json:"stiker_id,omitempty"`
+	StickerPackageID string `json:"sticker_package_id,omitempty"`
+	ItemID           int64  `json:"item_id,omitempty"`
+	OrderID          int64  `json:"order_id,omitempty"`
 	SourceContent    struct {
 		OrderSN string `json:"order_sn"`
 		ItemID  int64  `json:"item_id"`
-	} `json:"source_content"`
+	} `json:"source_content,omitempty"`
 }
 
 type ChatServiceOp struct {
@@ -166,7 +166,7 @@ type SendMessageRequest struct {
 
 type ContentSendMessage struct {
 	ContentMessage
-	ImageURL string `json:"image_url"`
+	ImageURL string `json:"image_url,omitempty"`
 }
 
 func (s *ChatServiceOp) SendMessage(shopID uint64, token string, request SendMessageRequest) (*GetSendMessageResponse, error) {
