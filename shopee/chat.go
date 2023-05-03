@@ -2,6 +2,8 @@ package shopee
 
 type ChatService interface {
 	GetMessage(shopID uint64, token string, params GetMessageParamsRequest) (*GetMessageResponse, error)
+	GetConversationList(shopID uint64, token string, params GetConversationParamsRequest) (*GetConversationResponse, error)
+	SendMessage(shopID uint64, token string, request SendMessageRequest) (*GetSendMessageResponse, error)
 }
 
 type GetMessageParamsRequest struct {
@@ -49,8 +51,8 @@ type ContentMessage struct {
 	TaxValue         string `json:"tax_value"`
 	PriceBeforeTax   string `json:"price_before_tax"`
 	TaxApplicable    bool   `json:"tax_applicable"`
-	StickerID        int    `json:"stiker_id"`
-	StickerPackageID int    `json:"sticker_package_id"`
+	StickerID        string `json:"stiker_id"`
+	StickerPackageID string `json:"sticker_package_id"`
 	ItemID           int64  `json:"item_id"`
 	OrderID          int64  `json:"order_id"`
 	SourceContent    struct {
@@ -72,5 +74,109 @@ func (s *ChatServiceOp) GetMessage(shopID uint64, token string, params GetMessag
 
 	resp := new(GetMessageResponse)
 	err := s.client.WithShop(uint64(shopID), token).Get(path, resp, opt)
+	return resp, err
+}
+
+type GetConversationParamsRequest struct {
+	Direction    string `url:"direction"`
+	Type         string `url:"type"`
+	NextTimeNano int64  `url:"next_timestamp_nano"`
+	PageSize     int    `url:"page_size"`
+}
+
+type GetConversationResponse struct {
+	BaseResponse
+
+	Response GetConversationDataResponse `json:"response"`
+}
+
+type GetConversationDataResponse struct {
+	PageResult        ConversationPageResult `json:"page_result"`
+	ConversationsList []Conversation         `json:"conversations"`
+}
+
+type Conversation struct {
+	ConversationID       string `json:"conversation_id"`
+	ToID                 int    `json:"to_id"`
+	ToName               string `json:"to_name"`
+	ToAvatar             string `json:"to_avatar"`
+	ShopID               int    `json:"shop_id"`
+	UnreadCount          int    `json:"unread_count"`
+	Pinned               bool   `json:"pinned"`
+	Mute                 bool   `json:"mute"`
+	LastReadMessageID    string `json:"last_read_message_id"`
+	LatestMessageID      string `json:"latest_message_id"`
+	LatestMessageType    string `json:"latest_message_type"`
+	LatestMessageContent struct {
+		Text string `json:"text"`
+	} `json:"latest_message_content"`
+	LatestMessageFromID      int    `json:"latest_message_from_id"`
+	LastMessageTimestamp     int64  `json:"last_message_timestamp"`
+	LastMessageOption        int    `json:"last_message_option"`
+	MaxGeneralOptionHideTime string `json:"max_general_option_hide_time"`
+}
+
+type ConversationPageResult struct {
+	PageSize   int `json:"page_size"`
+	NextCursor struct {
+		NextMessageTimeNano string `json:"next_message_time_nano"`
+		ConversationID      string `json:"conversation_id"`
+	} `json:"next_cursor"`
+	More bool `json:"more"`
+}
+
+func (s *ChatServiceOp) GetConversationList(shopID uint64, token string, params GetConversationParamsRequest) (*GetConversationResponse, error) {
+	path := "/sellerchat/get_conversation_list"
+
+	opt := GetConversationParamsRequest{
+		PageSize:     params.PageSize,
+		Direction:    params.Direction,
+		Type:         params.Type,
+		NextTimeNano: params.NextTimeNano,
+	}
+
+	resp := new(GetConversationResponse)
+	err := s.client.WithShop(uint64(shopID), token).Get(path, resp, opt)
+	return resp, err
+}
+
+type GetSendMessageResponse struct {
+	BaseResponse
+
+	Response GetSendMessageDataResponse `json:"response"`
+}
+
+type GetSendMessageDataResponse struct {
+	MessageID   string `json:"message_id"`
+	ToID        int    `json:"to_id"`
+	MessageType string `json:"message_type"`
+	Content     struct {
+		Text string `json:"text"`
+	} `json:"content"`
+	ConversationID   int64 `json:"conversation_id"`
+	CreatedTimestamp int   `json:"created_timestamp"`
+	MessageOption    int   `json:"message_option"`
+}
+
+type SendMessageRequest struct {
+	ToID        int64              `json:"to_id"`
+	MessageType string             `json:"message_type"`
+	Content     ContentSendMessage `json:"content"`
+}
+
+type ContentSendMessage struct {
+	ContentMessage
+	ImageURL string `json:"image_url"`
+}
+
+func (s *ChatServiceOp) SendMessage(shopID uint64, token string, request SendMessageRequest) (*GetSendMessageResponse, error) {
+	path := "/sellerchat/send_message"
+	resp := new(GetSendMessageResponse)
+	req, err := StructToMap(request)
+	if err != nil {
+		return nil, err
+	}
+
+	err = s.client.WithShop(uint64(shopID), token).Post(path, req, resp)
 	return resp, err
 }
